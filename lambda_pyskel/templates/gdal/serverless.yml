@@ -1,0 +1,24 @@
+service: pyskel
+
+provider:
+  name: aws
+  runtime: python3.6
+  stage: production
+
+  iamRoleStatements:
+  -  Effect: "Allow"
+     Action:
+       - "*"
+     Resource:
+       - "arn:aws:s3:::*"
+  environment:
+    GDAL_DATA: /var/task/share/gdal
+
+package:
+  artifact: package.zip
+
+functions:
+  mosaic-tile:
+    handler: pyskel.handler.main
+    memorySize: 1536
+    timeout: 300
