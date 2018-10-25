@@ -34,13 +34,64 @@ or install from source:
 Templates
 =========
 
+**Three** different templates are available:
+  - **simple**: simple python lambda function
+  - **rasterio**: include rasterio wheels
+  - **gdal**: include gdal shared libraries and configuration
+
+Each templates has the following structure::
+
+  pyskel/                : main module
+      __init__.py
+      handler.py         : handler function
+  tests/                 : python tests
+      test_handler.py
+      test_mod.py
+  Dockerfile             : Dockerfile to create the package.zip
+  LICENSE                : BSD-2 license file
+  Makefile               : make commands to create/tests the packages
+  package.json           : Node package requirement (serverless)
+  README.rst             : Readme
+  serverless.yml         : Serverless template
+  setup.py               : Python setup
+  tox.ini                : tox template
+
+
 Usage
 =====
 
 .. code-block:: console
 
-    $ lps yo-rasterio --template rasterio
+    $ lps --help
+      Usage: lps [OPTIONS] NAME
 
-    $ lps yo-simple --template simple
+        Create new python AWS Lambda skeleton.
 
-    $ lps yo-gdal --template gdal
+      Options:
+        --template [simple|rasterio|gdal]
+                                        Use specific template (default: 'simple')
+        --help                          Show this message and exit.
+
+
+Create a python lambda function with rasterio
+
+.. code-block:: console
+
+    $ lps yo --template rasterio
+    $ ls -1 yo
+      Dockerfile
+      LICENSE
+      Makefile
+      README.rst
+      package.json
+      serverless.yml
+      setup.py
+      tests/
+      tox.ini
+      yo/
+
+    # edit yo/handler.py and setup.py
+    $ make build
+
+    # edit serverless.yml
+    $ sls deploy
