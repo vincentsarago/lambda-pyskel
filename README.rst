@@ -4,10 +4,10 @@ lambda-pyskel
 
 Create python AWS Lambda skeleton from templates.
 
-.. image:: https://circleci.com/gh/vincentsarago/lambda-pyskel.svg?style=svg&circle-token=
+.. image:: https://circleci.com/gh/vincentsarago/lambda-pyskel.svg?style=svg
    :target: https://circleci.com/gh/vincentsarago/lambda-pyskel
 
-.. image:: https://codecov.io/gh/vincentsarago/lambda-pyskel/branch/master/graph/badge.svg?token=
+.. image:: https://codecov.io/gh/vincentsarago/lambda-pyskel/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/vincentsarago/lambda-pyskel
 
 Shameless inspiration from @sgillies https://github.com/mapbox/pyskel
