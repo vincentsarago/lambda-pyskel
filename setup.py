@@ -40,7 +40,6 @@ setup(
     url="https://github.com/vincentsarago/lambda-pyskel",
     license="BSD",
     packages=find_packages(exclude=["ez_setup", "examples", "tests"]),
-    package_data={"templates": ["*"]},
     include_package_data=True,
     zip_safe=False,
     install_requires=inst_reqs,

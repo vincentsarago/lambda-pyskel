@@ -1,1 +1,9 @@
-include lambda_pyskel/templates/*
+include lambda_pyskel/templates/gdal/*
+include lambda_pyskel/templates/gdal/pyskel/*
+include lambda_pyskel/templates/gdal/tests/*
+include lambda_pyskel/templates/rasterio/*
+include lambda_pyskel/templates/rasterio/pyskel/*
+include lambda_pyskel/templates/rasterio/tests/*
+include lambda_pyskel/templates/simple/*
+include lambda_pyskel/templates/simple/pyskel/*
+include lambda_pyskel/templates/simple/tests/*
