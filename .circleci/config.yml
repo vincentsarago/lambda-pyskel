@@ -41,7 +41,7 @@ jobs:
             name: verify git tag vs. version
             command: |
               VERSION=$(python -c 'import lambda_pyskel; print(lambda_pyskel.__version__)')
-              if [ $VERSION -eq $CIRCLE_TAG ]; then exit 0; else exit 3; fi
+              if [ "$VERSION" = "$CIRCLE_TAG" ]; then exit 0; else exit 3; fi
         - run:
             name: install dependencies
             command: pip install tox codecov pre-commit --user
