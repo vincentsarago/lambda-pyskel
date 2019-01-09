@@ -5,18 +5,11 @@ provider:
   runtime: python3.6
   stage: production
 
-  iamRoleStatements:
-  -  Effect: "Allow"
-     Action:
-       - "*"
-     Resource:
-       - "arn:aws:s3:::*"
-
 package:
   artifact: package.zip
 
 functions:
-  mosaic-tile:
+  pyskel:
     handler: pyskel.handler.main
     memorySize: 1536
     timeout: 300

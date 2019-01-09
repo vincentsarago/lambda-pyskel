@@ -1,0 +1,6 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'stack: {{stackName}} | deployed by Kes'
+Parameters:
+  MyParameter:
+    Type: String
+    Description: 'My parameter'

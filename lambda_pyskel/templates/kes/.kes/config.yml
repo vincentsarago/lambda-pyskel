@@ -1,0 +1,14 @@
+default:
+  stackName: pyskel
+  stage: production
+
+  parameters:
+    - name: MyParameter
+      value: someValue
+
+  lambdas:
+    - name: pyskel
+      handler: pyskel.handler.main
+      source: package.zip
+      timeout: 300
+      memorySize: 1536
