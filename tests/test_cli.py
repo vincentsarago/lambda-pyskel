@@ -21,8 +21,8 @@ def test_create_toolkit():
     """Test the create function with toolkit option"""
     runner = CliRunner()
     with runner.isolated_filesystem():
-        result = runner.invoke(create, ["myfunction", "kes"])
+        result = runner.invoke(create, ["myfunction", "--serverless-toolkit", "kes"])
         with open("myfunction/package.json", "r") as f:
-            assert json.parse(f.read())["devDependencies"].get("kes")
+            assert json.loads(f.read())["devDependencies"].get("kes")
         assert not result.exception
         assert result.exit_code == 0
