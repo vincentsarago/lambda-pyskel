@@ -1,14 +1,15 @@
 default:
-  stackName: pyskel
+  stackName: my-stack
   stage: production
+  system_bucket:
 
-  parameters:
-    - name: MyParameter
-      value: someValue
+  capabilities:
+    - CAPABILITY_IAM
 
   lambdas:
-    - name: pyskel
+    pyskel:
       handler: pyskel.handler.main
       source: package.zip
       timeout: 300
       memorySize: 1536
+      runtime: python3.6
