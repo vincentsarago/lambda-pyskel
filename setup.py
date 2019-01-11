@@ -14,7 +14,7 @@ with open("README.rst") as f:
     readme = f.read()
 
 # Runtime requirements.
-inst_reqs = ["click"]
+inst_reqs = ["click", "oyaml"]
 
 extra_reqs = {
     "test": ["pytest", "pytest-cov"],

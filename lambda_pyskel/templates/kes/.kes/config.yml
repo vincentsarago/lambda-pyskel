@@ -1,7 +1,7 @@
 default:
   stackName: my-stack
   stage: production
-  system_bucket:
+  system_bucket: "ADD YOUR OWN BUCKET HERE"
 
   capabilities:
     - CAPABILITY_IAM

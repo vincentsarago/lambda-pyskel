@@ -3,6 +3,7 @@
 import os
 import shutil
 
+import oyaml as yaml
 import click
 
 
@@ -36,6 +37,26 @@ def create(name, template, serverless_toolkit):
                 shutil.copytree(s, d)
             else:
                 shutil.copy2(s, d)
+
+        if template == "gdal":
+            if serverless_toolkit == "serverless":
+                config_file = os.path.join(name, f"serverless.yml")
+                with open(config_file, "r+") as f:
+                    d = yaml.load(f.read())
+                    d["provider"].update(
+                        {"environment": {"GDAL_DATA": "/var/task/share/gdal"}}
+                    )
+                    f.seek(0)
+                    f.write(yaml.dump(d, default_flow_style=False))
+            if serverless_toolkit == "kes":
+                config_file = os.path.join(name, f".kes/config.yml")
+                with open(config_file, "r+") as f:
+                    d = yaml.load(f.read())
+                    d["default"]["lambdas"]["pyskel"].update(
+                        {"envs": {"GDAL_DATA": "/var/task/share/gdal"}}
+                    )
+                    f.seek(0)
+                    f.write(yaml.dump(d, default_flow_style=False))
 
     new_dir = name
     name = name.replace("-", "_")
