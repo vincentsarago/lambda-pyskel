@@ -7,3 +7,6 @@ include lambda_pyskel/templates/rasterio/tests/*
 include lambda_pyskel/templates/simple/*
 include lambda_pyskel/templates/simple/pyskel/*
 include lambda_pyskel/templates/simple/tests/*
+include lambda_pyskel/templates/kes/*
+include lambda_pyskel/templates/kes/.kes/*
+include lambda_pyskel/templates/serverless/*

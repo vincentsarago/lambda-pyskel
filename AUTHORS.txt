@@ -1,0 +1,6 @@
+Authors
+-------
+
+* Vincent Sarago <vincent.sarago@gmail.com>
+
+See also https://github.com/vincentsarag/lambda-pyskel/graphs/contributors.
