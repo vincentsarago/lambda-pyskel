@@ -1,0 +1,12 @@
+2.0.0
+-----
+- Make deployment toolkit optional
+- Add KES toolkit
+
+1.0.1
+-----
+- Fix missing files in MANIFEST.txt
+
+1.0.0
+-----
+- initial release

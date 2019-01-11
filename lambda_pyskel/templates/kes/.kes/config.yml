@@ -1,0 +1,15 @@
+default:
+  stackName: my-stack
+  stage: production
+  system_bucket: "ADD YOUR OWN BUCKET HERE"
+
+  capabilities:
+    - CAPABILITY_IAM
+
+  lambdas:
+    pyskel:
+      handler: pyskel.handler.main
+      source: package.zip
+      timeout: 300
+      memorySize: 1536
+      runtime: python3.6

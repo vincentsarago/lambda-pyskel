@@ -26,6 +26,3 @@ test:
 clean:
 	docker stop lambda
 	docker rm lambda
-
-deploy:
-	sls deploy --stage production

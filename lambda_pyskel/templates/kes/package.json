@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "",
     "devDependencies": {
-        "serverless": "^1.23.0"
+        "kes": "^2.2.7"
     },
     "author": ""
 }

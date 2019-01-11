@@ -7,7 +7,6 @@ Create python AWS Lambda skeleton from templates.
 .. image:: https://img.shields.io/pypi/v/lambda-pyskel.svg
    :target: https://pypi.org/project/lambda-pyskel/
 
-
 .. image:: https://circleci.com/gh/vincentsarago/lambda-pyskel.svg?style=svg
    :target: https://circleci.com/gh/vincentsarago/lambda-pyskel
 
@@ -54,29 +53,33 @@ Each templates has the following structure::
   Dockerfile             : Dockerfile to create the package.zip
   LICENSE                : BSD-2 license file
   Makefile               : make commands to create/tests the packages
-  package.json           : Node package requirement (serverless)
   README.rst             : Readme
-  serverless.yml         : Serverless template
   setup.py               : Python setup
   tox.ini                : tox template
 
+Deployement Toolkit
+===================
+
+In addition to python module templates, lambda-pyskel can also add
+configuration files for **serverless** or **kes** toolkit.
+
+**kes**: http://devseed.com/kes/
+
+**serverless**: https://serverless.com
 
 Usage
 =====
 
 .. code-block:: console
 
-    $ lps --help
-      Usage: lps [OPTIONS] NAME
+    $ Usage: lps [OPTIONS] NAME
 
-        Create new python AWS Lambda skeleton.
+      Create new python AWS Lambda skeleton.
 
-      Options:
-        --template [simple|rasterio|gdal]
-                                        Use specific template (default: 'simple')
-        --help                          Show this message and exit.
-
-
+    Options:
+      --template [simple|rasterio|gdal]     Use specific template (default: 'simple')
+      --serverless-toolkit [kes|serverless] add deployement toolkit
+      --help                                Show this message and exit.
 Create a python lambda function with rasterio
 
 .. code-block:: console
@@ -87,8 +90,6 @@ Create a python lambda function with rasterio
       LICENSE
       Makefile
       README.rst
-      package.json
-      serverless.yml
       setup.py
       tests/
       tox.ini
@@ -96,9 +97,6 @@ Create a python lambda function with rasterio
 
     # edit yo/handler.py and setup.py
     $ make build
-
-    # edit serverless.yml
-    $ sls deploy
 
 
 Contribution & Devellopement

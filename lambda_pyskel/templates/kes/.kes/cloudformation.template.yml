@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'pyskel | stack: {{stackName}} | deployed by Kes'
+
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+            - es.amazonaws.com
+          Action:
+          - sts:AssumeRole
+
+#################################################
+# Lambda config BEGIN
+#################################################
+{{#each lambdas}}
+  {{name}}LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: {{../system_bucket}}
+        S3Key: {{remote}}
+      FunctionName: {{../stackName}}-{{name}}
+      Environment:
+        Variables:
+          stackName: {{../stackName}}
+      {{# if envs}}
+        {{#each envs}}
+          {{@key}}: {{this}}
+        {{/each}}
+      {{/if}}
+      Handler: {{handler}}
+      MemorySize: {{memory}}
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: {{runtime}}
+      Timeout: {{timeout}}
+      Tags:
+        - Key: StackName
+          Value: {{../stackName}}
+
+{{/each}}
+#################################################
+# Lambda config END
+#################################################
