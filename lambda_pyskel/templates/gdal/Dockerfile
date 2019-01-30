@@ -1,113 +1,125 @@
-FROM lambdalinux/baseimage-amzn:2017.03-004
+################################################################################
+# GDAL Install copied from https://github.com/RemotePixel/amazonlinux-gdal/blob/gdal2.4.0/Dockerfile
+FROM lambci/lambda:build-python3.6
 
-RUN yum update -y && yum upgrade -y
-RUN yum install -y python36-devel python36-pip gcc gcc-c++
-RUN yum install zip unzip
-RUN yum clean all
+ENV \
+  LANG=en_US.UTF-8 \
+  LC_ALL=en_US.UTF-8
 
-ENV LANG=en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
-
-# install system libraries
 RUN yum makecache fast
-RUN yum install -y cmake automake glib2-devel
-RUN yum install -y wget tar unzip zip bzip2 gzip findutils yum-utils openssl-devel
-RUN yum install -y zlib-devel curl-devel libcurl-devel libjpeg-devel libpng-devel liblzma-dev libmpc-devel mpfr-devel gmp-devel
-RUN yum clean all
+RUN yum install -y automake16 libpng-devel nasm
 
-# Install GDAL and deps
-ENV APP_DIR /tmp/src
-RUN mkdir $APP_DIR
+ENV PREFIX /var/task
 
 # versions of packages
 ENV \
   PKGCONFIG_VERSION=0.29.2 \
-  PROJ_VERSION=5.1.0 \
-  GEOS_VERSION=3.6.2 \
+  PROJ_VERSION=5.2.0 \
+  GEOS_VERSION=3.7.1 \
   OPENJPEG_VERSION=2.3.0 \
-  WEBP_VERSION=1.0.0 \
-  ZSTD_VERSION=1.3.4 \
+  LIBJPEG_TURBO_VERSION=2.0.1 \
+  WEBP_VERSION=1.0.1 \
+  ZSTD_VERSION=1.3.8 \
+  CURL_VERSION=7.59.0 \
+  NGHTTP2_VERSION=1.35.1 \
   GDAL_VERSION=2.4.0
 
+# nghttp2
+RUN mkdir /tmp/nghttp2 \
+  && curl -sfL https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.gz | tar zxf - -C /tmp/nghttp2 --strip-components=1 \
+  && cd /tmp/nghttp2 \
+  && ./configure --enable-lib-only --prefix=$PREFIX \
+  && make -j $(nproc) --silent && make install && make clean \
+  && rm -rf /tmp/nghttp2
+
+# libcurl
+RUN mkdir /tmp/libcurl \
+  && curl -sfL https://curl.haxx.se/download/curl-${CURL_VERSION}.tar.gz | tar zxf - -C /tmp/libcurl --strip-components=1 \
+  && cd /tmp/libcurl \
+  && ./configure --disable-manual --disable-cookies --with-nghttp2=$PREFIX --prefix=$PREFIX \
+  && make -j $(nproc) --silent && make install && make clean \
+  && rm -rf /tmp/libcurl
+
 # pkg-config
-RUN cd $APP_DIR \
-   && wget -q https://pkg-config.freedesktop.org/releases/pkg-config-$PKGCONFIG_VERSION.tar.gz \
-   && tar xvf pkg-config-$PKGCONFIG_VERSION.tar.gz \
-   && cd pkg-config-$PKGCONFIG_VERSION \
-   && ./configure CFLAGS="-O2 -Wl,-S" --prefix=$APP_DIR/local \
-   && make -j4 --quiet && make install --quiet && make clean --quiet \
-   && rm -rf $APP_DIR/pkg-config-$PKGCONFIG_VERSION.tar.gz $APP_DIR/pkg-config-$PKGCONFIG_VERSION
+RUN mkdir /tmp/pkg-config \
+   && curl -sfL https://pkg-config.freedesktop.org/releases/pkg-config-$PKGCONFIG_VERSION.tar.gz | tar zxf - -C /tmp/pkg-config --strip-components=1 \
+   && cd /tmp/pkg-config \
+   && CFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
+   && make -j $(nproc) --silent && make install && make clean \
+   && rm -rf /tmp/pkg-config
 
-# PROJ
-RUN cd $APP_DIR \
-   && wget -q http://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz \
-   && tar -zvxf proj-$PROJ_VERSION.tar.gz \
-   && cd proj-$PROJ_VERSION \
-   && ./configure CFLAGS="-O2 -Wl,-S" --prefix=$APP_DIR/local \
-   && make -j4 --quiet && make install --quiet && make clean --quiet \
-   && rm -rf $APP_DIR/proj-$PROJ_VERSION.tar.gz $APP_DIR/proj-$PROJ_VERSION
+# proj
+RUN mkdir /tmp/proj \
+   && curl -sfL http://download.osgeo.org/proj/proj-$PROJ_VERSION.tar.gz | tar zxf - -C /tmp/proj --strip-components=1 \
+   && cd /tmp/proj \
+   && CFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
+   && make -j $(nproc) --silent && make install && make clean \
+   && rm -rf /tmp/proj
 
-# GEOS
-RUN cd $APP_DIR \
-  && wget -q http://download.osgeo.org/geos/geos-$GEOS_VERSION.tar.bz2 \
-  && tar jxf geos-$GEOS_VERSION.tar.bz2 \
-  && cd geos-$GEOS_VERSION \
-  && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$APP_DIR/local \
-  && make -j4 --quiet && make install --quiet && make clean --quiet \
-  && rm -rf $APP_DIR/geos-$GEOS_VERSION $APP_DIR/geos-$GEOS_VERSION.tar.bz2
+# geos
+RUN mkdir /tmp/geos \
+  && curl -sfL http://download.osgeo.org/geos/geos-$GEOS_VERSION.tar.bz2 | tar jxf - -C /tmp/geos --strip-components=1 \
+  && cd /tmp/geos \
+  && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
+  && make -j $(nproc) --silent && make install && make clean \
+  && rm -rf /tmp/geos
 
-# OPENJPEG
-RUN cd $APP_DIR \
-  && wget -q https://github.com/uclouvain/openjpeg/archive/v$OPENJPEG_VERSION.tar.gz \
-  && tar -zvxf v$OPENJPEG_VERSION.tar.gz \
-  && cd openjpeg-$OPENJPEG_VERSION/ \
-  && mkdir build \
-  && cd build \
-  && cmake .. -DBUILD_THIRDPARTY:BOOL=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$APP_DIR/local \
-  && make install --quiet && make clean --quiet \
-  && rm -rf $APP_DIR/openjpeg-$OPENJPEG_VERSION $APP_DIR/v$OPENJPEG_VERSION.tar.gz
+# openjpeg
+RUN mkdir /tmp/openjpeg \
+  && curl -sfL https://github.com/uclouvain/openjpeg/archive/v$OPENJPEG_VERSION.tar.gz | tar zxf - -C /tmp/openjpeg --strip-components=1 \
+  && cd /tmp/openjpeg \
+  && mkdir build && cd build \
+  && cmake .. -DBUILD_THIRDPARTY:BOOL=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PREFIX \
+  && make -j $(nproc) install && make clean \
+  && rm -rf /tmp/openjpeg
 
-# WEBP
-RUN cd $APP_DIR\
-    && wget -q https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${WEBP_VERSION}.tar.gz \
-    && tar xzf libwebp-${WEBP_VERSION}.tar.gz \
-    && cd libwebp-${WEBP_VERSION} \
-    && CFLAGS="-O2 -Wl,-S" ./configure --prefix=$APP_DIR/local/ \
-    && make -j4 && make install --quiet && make clean --quiet \
-    && rm -rf $APP_DIR/libwebp-${WEBP_VERSION} $APP_DIR/libwebp-${WEBP_VERSION}.tar.gz
+# jpeg_turbo
+RUN mkdir /tmp/jpeg \
+  && curl -sfL https://github.com/libjpeg-turbo/libjpeg-turbo/archive/${LIBJPEG_TURBO_VERSION}.tar.gz | tar zxf - -C /tmp/jpeg --strip-components=1 \
+  && cd /tmp/jpeg \
+  && cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$PREFIX . \
+  && make -j $(nproc) install && make clean \
+  && rm -rf /tmp/jpeg
 
-# ZSTD
-RUN cd $APP_DIR \
-  && wget -q https://github.com/facebook/zstd/archive/v${ZSTD_VERSION}.tar.gz \
-  && tar -zvxf v${ZSTD_VERSION}.tar.gz \
-  && cd zstd-${ZSTD_VERSION} \
-  && make -j4 --quiet PREFIX=$APP_DIR/local/ ZSTD_LEGACY_SUPPORT=0 CFLAGS=-O1 \
-  && make install --quiet PREFIX=$APP_DIR/local/ ZSTD_LEGACY_SUPPORT=0 CFLAGS=-O1 \
-  && make clean --quiet \
-  && rm -rf $APP_DIR/v${ZSTD_VERSION}.tar.gz $APP_DIR/zstd-${ZSTD_VERSION}
+# webp
+RUN mkdir /tmp/webp \
+    && curl -sfL https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${WEBP_VERSION}.tar.gz | tar zxf - -C /tmp/webp --strip-components=1 \
+    && cd /tmp/webp \
+    && CFLAGS="-O2 -Wl,-S" ./configure --prefix=$PREFIX \
+    && make -j $(nproc) --silent && make install && make clean \
+    && rm -rf /tmp/webp
 
-ENV LD_LIBRARY_PATH=$APP_DIR/local/lib:$LD_LIBRARY_PATH
-ENV PKG_CONFIG_PATH=$APP_DIR/local/lib/pkgconfig/
+# zstd
+RUN mkdir /tmp/zstd \
+  && curl -sfL https://github.com/facebook/zstd/archive/v${ZSTD_VERSION}.tar.gz | tar zxf - -C /tmp/zstd --strip-components=1 \
+  && cd /tmp/zstd \
+  && make -j $(nproc) PREFIX=$PREFIX ZSTD_LEGACY_SUPPORT=0 CFLAGS=-O1 --silent && make install PREFIX=$PREFIX ZSTD_LEGACY_SUPPORT=0 CFLAGS=-O1 && make clean \
+  && rm -rf /tmp/zstd
 
-RUN cd $APP_DIR \
-  && wget -q https://github.com/osgeo/gdal/archive/master.zip \
-  && unzip master.zip \
-  && cd gdal-master/gdal \
-  && CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure \
-      --prefix=$APP_DIR/local \
-      --with-proj=$APP_DIR/local \
-      --with-geos=$APP_DIR/local/bin/geos-config \
+ENV PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig/
+
+# gdal
+RUN mkdir /tmp/gdal \
+  && curl -sfL https://github.com/OSGeo/gdal/archive/v${GDAL_VERSION}.tar.gz | tar zxf - -C /tmp/gdal --strip-components=2
+
+RUN cd /tmp/gdal \
+  && touch config.rpath \
+  && LDFLAGS="-Wl,-rpath,$PREFIX/lib -Wl,-rpath,$PREFIX/lib64 -Wl,-z,origin" CFLAGS="-O2 -Wl,-S" CXXFLAGS="-O2 -Wl,-S" ./configure \
+      --prefix=$PREFIX \
+      --with-proj=$PREFIX \
+      --with-geos=$PREFIX/bin/geos-config \
+      --with-curl=$PREFIX/bin/curl-config \
       --with-openjpeg \
-      --with-webp=$APP_DIR/local \
-      --with-zstd=$APP_DIR/local \
+      --with-jpeg=$PREFIX \
+      --with-webp=$PREFIX \
+      --with-zstd=$PREFIX \
+      --with-crypto \
+      --with-libtiff=internal \
       --with-threads \
       --disable-debug \
-      --with-jpeg \
-      --with-hide-internal-symbols \
-      --with-curl \
+      --with-hide-internal-symbols=yes \
       --without-bsb \
       --without-cfitsio \
-      --without-cryptopp \
       --without-ecw \
       --without-expat \
       --without-fme \
@@ -144,52 +156,64 @@ RUN cd $APP_DIR \
       --without-sde \
       --without-sqlite3 \
       --without-xerces \
-      --without-xml2 \
-    && make -j4 --quiet && make install --quiet && make clean --quiet \
-    && rm -rf $APP_DIR/master.zip $APP_DIR/gdal-master
+      --without-xml2
 
-ENV GDAL_DATA=$APP_DIR/local/share/gdal
-ENV PROJ_LIB=$APP_DIR/local/share/proj
-ENV GDAL_CONFIG=$APP_DIR/local/bin/gdal-config
-ENV GEOS_CONFIG=$APP_DIR/local/bin/geos-config
+RUN cd /tmp/gdal \
+  && make -j $(nproc) --silent && make install && make clean \
+  && rm -rf /tmp/gdal
 
-RUN pip-3.6 install pip -U
+RUN yum clean all
 
-RUN pip3 install numpy --no-binary numpy
+ENV \
+  GDAL_DATA=$PREFIX/share/gdal \
+  PROJ_LIB=$PREFIX/share/proj \
+  GDAL_CONFIG=$PREFIX/bin/gdal-config \
+  GEOS_CONFIG=$PREFIX/bin/geos-config
+
+ENV PATH=$PREFIX/bin:$PATH
+
+RUN pip3 install pip -U
+RUN pip3 install cython numpy --no-binary numpy
 
 ################################################################################
-# Install Python dependencies
-COPY pyskel /tmp/app/pyskel
-COPY README.rst /tmp/app/README.rst
-COPY setup.py /tmp/app/setup.py
-
-RUN pip3 install /tmp/app/ -t /tmp/vendored --no-binary numpy,rasterio -U
+#                            CREATE PACKAGE                                    #
 ################################################################################
+ENV PACKAGE_PREFIX /tmp/python
+WORKDIR /tmp
 
-RUN du -sh /tmp/vendored
+COPY pyskel pyskel
+COPY README.rst README.rst
+COPY setup.py setup.py
 
-# This is the list of available modules on AWS lambda Python 3
-# ['boto3', 'botocore', 'docutils', 'jmespath', 'pip', 'python-dateutil', 's3transfer', 'setuptools', 'six']
-RUN find /tmp/vendored -name "*-info" -type d -exec rm -rdf {} +
-RUN rm -rdf /tmp/vendored/boto3/
-RUN rm -rdf /tmp/vendored/botocore/
-RUN rm -rdf /tmp/vendored/docutils/
-RUN rm -rdf /tmp/vendored/dateutil/
-RUN rm -rdf /tmp/vendored/jmespath/
-RUN rm -rdf /tmp/vendored/s3transfer/
-RUN rm -rdf /tmp/vendored/numpy/doc/
+RUN pip3 install . --no-binary numpy,rasterio -t $PACKAGE_PREFIX -U
+
+################################################################################
+#                            REDUCE PACKAGE SIZE                               #
+################################################################################
+RUN find $PACKAGE_PREFIX -name "*-info" -type d -exec rm -rdf {} +
+RUN rm -rdf $PACKAGE_PREFIX/boto3/ \
+  && rm -rdf $PACKAGE_PREFIX/botocore/ \
+  && rm -rdf $PACKAGE_PREFIX/docutils/ \
+  && rm -rdf $PACKAGE_PREFIX/dateutil/ \
+  && rm -rdf $PACKAGE_PREFIX/jmespath/ \
+  && rm -rdf $PACKAGE_PREFIX/s3transfer/ \
+  && rm -rdf $PACKAGE_PREFIX/numpy/doc/
 
 # Leave module precompiles for faster Lambda startup
-RUN find /tmp/vendored -type f -name '*.pyc' | while read f; do n=$(echo $f | sed 's/__pycache__\///' | sed 's/.cpython-36//'); cp $f $n; done;
-RUN find /tmp/vendored -type d -a -name '__pycache__' -print0 | xargs -0 rm -rf
-RUN find /tmp/vendored -type f -a -name '*.py' -print0 | xargs -0 rm -f
+RUN find $PACKAGE_PREFIX -type f -name '*.pyc' | while read f; do n=$(echo $f | sed 's/__pycache__\///' | sed 's/.cpython-36//'); cp $f $n; done;
+RUN find $PACKAGE_PREFIX -type d -a -name '__pycache__' -print0 | xargs -0 rm -rf
+RUN find $PACKAGE_PREFIX -type f -a -name '*.py' -print0 | xargs -0 rm -f
 
-RUN du -sh /tmp/vendored
+RUN cd $PREFIX && find lib -name \*.so\* -exec strip {} \;
+RUN cd $PREFIX && find lib64 -name \*.so\* -exec strip {} \;
 
-# Create archive
-RUN cd /tmp/vendored && zip -r9q /tmp/package.zip *
-RUN cd $APP_DIR/local && zip -r9q --symlinks /tmp/package.zip lib/*.so*
-RUN cd $APP_DIR/local && zip -r9q /tmp/package.zip share
+################################################################################
+#                              CREATE ARCHIVE                                  #
+################################################################################
+RUN cd $PACKAGE_PREFIX && zip -r9q /tmp/package.zip *
+RUN cd $PREFIX && zip -r9q --symlinks /tmp/package.zip lib/*.so*
+RUN cd $PREFIX && zip -r9q --symlinks /tmp/package.zip lib64/*.so*
+RUN cd $PREFIX && zip -r9q /tmp/package.zip share
 
 # Cleanup
-RUN rm -rf /tmp/vendored/
+RUN rm -rf $PACKAGE_PREFIX

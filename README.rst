@@ -40,7 +40,7 @@ Templates
 **Three** different templates are available:
   - **simple**: simple python lambda function
   - **rasterio**: include rasterio wheels
-  - **gdal**: include gdal shared libraries and configuration
+  - **gdal**: include custom gdal (2.4.0) installation
 
 Each templates has the following structure::
 

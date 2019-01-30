@@ -11,14 +11,17 @@ build:
 shell:
 	docker build --tag lambda:latest .
 	docker run --name docker  \
-		--volume $(shell pwd)/:/data \
-		--rm -it lambda:latest /bin/bash
+		--volume $(shell pwd)/:/local \
+		--rm -it lambda:latest bash
 
-test:
-	docker build --tag lambda:latest .
-	docker run -w /var/task/ --name lambda --env PYTHONPATH=/var/task --env GDAL_DATA=/var/task/share/gdal -itd lambda:latest /bin/bash
-	docker exec -it lambda bash -c 'unzip -q /tmp/package.zip -d /var/task/'
-	docker exec -it lambda bash -c 'pip3 install boto3 jmespath python-dateutil -t /var/task -U'
+test: build
+	docker run \
+		--name lambda \
+		--volume $(shell pwd)/:/local \
+		--env GDAL_DATA=/var/task/share/gdal \
+		-itd \
+		lambci/lambda:build-python3.6 bash
+	docker exec -it lambda bash -c 'unzip -q /local/package.zip -d /var/task/'
 	docker exec -it lambda python3 -c 'from pyskel.handler import main; print(main(None, None))'
 	docker stop lambda
 	docker rm lambda
