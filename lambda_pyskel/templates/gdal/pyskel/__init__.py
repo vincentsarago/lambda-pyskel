@@ -1,5 +1,7 @@
 # pyskel
 
-__version__ = "1.0.0"
+import pkg_resources
+
+version = pkg_resources.get_distribution(__package__).version
 
 has_legs = "Maybe"

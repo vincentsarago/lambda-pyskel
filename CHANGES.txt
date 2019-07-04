@@ -1,3 +1,8 @@
+3.0.0
+-----
+- global refactor
+- `gdal` template uses remotepixel amazonlinux GDAL docker image
+
 2.0.1
 -----
 - Switch over lambci Docker images (ref: https://github.com/RemotePixel/amazonlinux-gdal/pull/9)

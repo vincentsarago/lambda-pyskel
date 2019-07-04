@@ -1,28 +1,19 @@
 from setuptools import setup, find_packages
 
-with open("pyskel/__init__.py") as f:
-    for line in f:
-        if line.find("__version__") >= 0:
-            version = line.split("=")[1].strip()
-            version = version.strip('"')
-            version = version.strip("'")
-            break
-
-
-with open("README.rst") as f:
+with open("README.md") as f:
     readme = f.read()
 
 # Runtime requirements.
 inst_reqs = ["click", "rasterio[s3]"]
-
 extra_reqs = {"test": ["pytest", "pytest-cov"]}
 
 
 setup(
     name="pyskel",
-    version=version,
+    version="0.0.1",
     description=u"Skeleton of a python AWS Lambda function",
     long_description=readme,
+    long_description_content_type="text/markdown",
     python_requires=">=3",
     classifiers=[
         "Intended Audience :: Information Technology",
@@ -35,7 +26,6 @@ setup(
     author=u"",
     author_email="",
     url="",
-    license="BSD",
     packages=find_packages(exclude=["ez_setup", "examples", "tests"]),
     include_package_data=True,
     zip_safe=False,

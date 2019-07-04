@@ -14,15 +14,14 @@ ENV PACKAGE_PREFIX /tmp/python
 WORKDIR /tmp
 
 COPY pyskel pyskel
-COPY README.rst README.rst
 COPY setup.py setup.py
+COPY README.md README.md
 
 RUN pip3 install . --no-binary numpy -t $PACKAGE_PREFIX -U
 
 ################################################################################
 #                            REDUCE PACKAGE SIZE                               #
 ################################################################################
-RUN find $PACKAGE_PREFIX -name "*-info" -type d -exec rm -rdf {} +
 RUN rm -rdf $PACKAGE_PREFIX/boto3/ \
   && rm -rdf $PACKAGE_PREFIX/botocore/ \
   && rm -rdf $PACKAGE_PREFIX/docutils/ \

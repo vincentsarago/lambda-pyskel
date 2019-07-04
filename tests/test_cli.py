@@ -13,8 +13,8 @@ def test_create():
     runner = CliRunner()
     with runner.isolated_filesystem():
         result = runner.invoke(create, ["myfunction"])
-        with open("myfunction/README.rst", "r") as f:
-            assert f.read().splitlines()[0] == "myfunction"
+        with open("myfunction/README.md", "r") as f:
+            assert f.read().splitlines()[0] == "# myfunction"
         assert not result.exception
         assert result.exit_code == 0
 

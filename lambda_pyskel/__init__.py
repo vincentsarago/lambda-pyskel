@@ -1,3 +1,5 @@
 """lambda_pyskel module."""
 
-__version__ = "2.0.1"
+import pkg_resources
+
+version = pkg_resources.get_distribution(__package__).version

@@ -6,8 +6,11 @@ import shutil
 import oyaml as yaml
 import click
 
+from lambda_pyskel import version
+
 
 @click.command(short_help="Create new python AWS Lambda skeleton")
+@click.version_option(version=version, message="%(version)s")
 @click.argument("name", type=str, nargs=1)
 @click.option(
     "--template",
@@ -18,7 +21,7 @@ import click
 @click.option(
     "--serverless-toolkit",
     type=click.Choice(["kes", "serverless"]),
-    help="add deployement toolkit",
+    help="Add deployement toolkit",
 )
 def create(name, template, serverless_toolkit):
     """Create new python AWS Lambda skeleton."""
@@ -28,7 +31,7 @@ def create(name, template, serverless_toolkit):
 
     if serverless_toolkit:
         toolkit_dir = os.path.join(
-            os.path.dirname(__file__), f"../templates/{serverless_toolkit}"
+            os.path.dirname(__file__), f"../templates/toolkits/{serverless_toolkit}"
         )
         for item in os.listdir(toolkit_dir):
             s = os.path.join(toolkit_dir, item)
@@ -66,6 +69,8 @@ def create(name, template, serverless_toolkit):
 
     for root, dirs, files in os.walk(new_dir):
         for filename in files:
+            if filename.endswith(".pyc"):
+                continue
             with open(f"{root}/{filename}", "r", encoding="utf-8") as f:
                 s = f.read().replace("pyskel", name)
 

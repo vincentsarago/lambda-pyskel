@@ -2,15 +2,7 @@
 
 from setuptools import setup, find_packages
 
-with open("lambda_pyskel/__init__.py") as f:
-    for line in f:
-        if line.find("__version__") >= 0:
-            version = line.split("=")[1].strip()
-            version = version.strip('"')
-            version = version.strip("'")
-            break
-
-with open("README.rst") as f:
+with open("README.md") as f:
     readme = f.read()
 
 # Runtime requirements.
@@ -22,10 +14,11 @@ extra_reqs = {
 }
 
 setup(
-    name="lambda_pyskel",
-    version=version,
+    name="lambda-pyskel",
+    version="3.0.0",
     description=u"Create skeleton of a python AWS Lambda function",
     long_description=readme,
+    long_description_content_type="text/markdown",
     python_requires=">=3",
     classifiers=[
         "Intended Audience :: Information Technology",
@@ -38,7 +31,7 @@ setup(
     author=u"Vincent Sarago",
     author_email="vincent.sarago@gmail.com",
     url="https://github.com/vincentsarago/lambda-pyskel",
-    license="BSD",
+    license="BSD-3",
     packages=find_packages(exclude=["ez_setup", "examples", "tests"]),
     include_package_data=True,
     zip_safe=False,
